@@ -16,19 +16,29 @@ public class Fruit {
     this.sprite = sprite;
     this.eaten = false;
   }
-
+  /**
+  * @return Returns the current x-coordinate.
+  */
   public int getX() {
     return this.x;
   }
-
+  /**
+  * @return Returns the current y-coordinate.
+  */
   public int getY() {
     return this.y;
   }
 
+  /**
+  * @return Returns the whether or not the fruit has been eaten.
+  */
   public boolean isEaten() {
     return this.eaten;
   }
 
+  /**
+  * Sets the eaten boolean to true.
+  */
   public void eat() {
     this.eaten = true;
   }
@@ -37,6 +47,10 @@ public class Fruit {
 
   }
 
+  /**
+  * Draws each fruit sprite to the screen.
+  * @param the PApplet object to which the sprite is drawn.
+  */
   public void draw(PApplet app) {
     if (!this.eaten) {
       app.image(this.sprite, this.x, this.y);

@@ -13,12 +13,18 @@ public class SuperFruit extends Fruit {
     this.ghosts = ghosts;
   }
 
+  /**
+  * Tick method that handles logic when the fruit is eaten.
+  */
   public void tick() {
     if (this.eaten) {
       this.frighten();
     }
   }
 
+  /**
+  * Frightens all ghosts.
+  */
   public void frighten() {
     for (Ghost ghost : this.ghosts) {
       ghost.frightenGhost();

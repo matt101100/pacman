@@ -36,6 +36,13 @@ public class App extends PApplet {
         this.ghosts = new ArrayList<Ghost>();
     }
 
+    /**
+    * Set-up method which handles pre-game loading. Sets the framerate, reads the map and config
+    * files and stores relevant variables from the file into class variables.
+    * Also handles the drawing of Wall, Fruit, superFruit, Waka and Ghost objects based on
+    * when their respective chars appear in the grid.
+    * Also sets the correct Waka object for Ghosts to utilise.
+    */
     public void setup() {
         frameRate(60);
 
@@ -81,22 +88,26 @@ public class App extends PApplet {
            } else if (this.grid[i][j] == 'a') {
              this.ghosts.add(new Ambusher(x - 6, y - 6, intSpeed, this.grid, this.modeTimes,
                                           this.loadImage("src/main/resources/ambusher.png"),
-                                          this.loadImage("src/main/resources/frightened.png")));
+                                          this.loadImage("src/main/resources/frightened.png"),
+                                          this.waka));
              x += 16;
            } else if (this.grid[i][j] == 'c') {
              this.ghosts.add(new Chaser(x - 6, y - 6, intSpeed, this.grid, this.modeTimes,
                                        this.loadImage("src/main/resources/chaser.png"),
-                                       this.loadImage("src/main/resources/frightened.png")));
+                                       this.loadImage("src/main/resources/frightened.png"),
+                                       this.waka));
              x += 16;
            } else if (this.grid[i][j] == 'i') {
              this.ghosts.add(new Ignorant(x - 6, y - 6, intSpeed, this.grid, this.modeTimes,
                                        this.loadImage("src/main/resources/ignorant.png"),
-                                       this.loadImage("src/main/resources/frightened.png")));
+                                       this.loadImage("src/main/resources/frightened.png"),
+                                       this.waka));
              x += 16;
            } else if (this.grid[i][j] == 'w') {
              this.ghosts.add(new Whim(x - 6, y - 6, intSpeed, this.grid, this.modeTimes,
                                        this.loadImage("src/main/resources/whim.png"),
-                                       this.loadImage("src/main/resources/frightened.png")));
+                                       this.loadImage("src/main/resources/frightened.png"),
+                                       this.waka));
              x += 16;
            } else if (this.grid[i][j] == 'p') {
              this.waka = new Waka(x - 5, y - 5, intLives, intSpeed,
@@ -114,12 +125,24 @@ public class App extends PApplet {
          y += 16; // moving down by 16 pixels
          x = 0; // shifting back along the x-axis
        }
+
+       // setting Waka for each ghost
+       for (Ghost ghost : this.ghosts) {
+         ghost.setWaka(this.waka);
+       }
     }
 
+    /**
+    * Sets the dimensions of the app window.
+    */
     public void settings() {
         size(WIDTH, HEIGHT);
     }
 
+    /**
+    * Handles drawing object sprites to the screen as well as ensuring each game object runs its
+    * tick() method.
+    */
     public void draw() {
         background(0, 0, 0);
 
@@ -152,10 +175,12 @@ public class App extends PApplet {
         for (Ghost ghost : this.ghosts) {
           ghost.draw(this);
         }
-
-       //System.out.println(this.frameRate);
     }
 
+    /**
+    * Reads keyboard input and sets Waka's future velocities based on the input.
+    * Also allows Waka to turn when available.
+    */
     public void keyPressed() {
       if (keyCode == LEFT) {
         this.waka.setVelocity(-1 * (int) this.speed, 0);
@@ -172,7 +197,13 @@ public class App extends PApplet {
       }
     }
 
-    // reads the config file
+    /**
+    * Reads the specified config JSON file and stores the information in respective class variables.
+    * @param filename The String representing the directory the file is in.
+    * @throws FileNotFoundException If the file name cannot be found or cannot be opened.
+    * @throws IOException Checked exception that must be thrown.
+    * @throws ParseException If the file cannot be parsed.
+    */
     public void readConfigFile(String filename) {
       if (filename == null) {
         return;
@@ -204,7 +235,11 @@ public class App extends PApplet {
       }
     }
 
-    // reads map file and converts the information into a char array
+    /**
+    * Reads the specified map file and stores information in a char[][] array
+    * @param filename String representing the directory the file is in.
+    * @throws FileNotFoundException If the file cannot be found or opened.
+    */
     public boolean readMapFile(String filename) {
       if (filename == null) {
         return false;
@@ -223,11 +258,12 @@ public class App extends PApplet {
         return true;
       } catch (FileNotFoundException e) {
         return false;
-      } catch (NullPointerException e) {
-        return false;
       }
     }
 
+    /**
+    * Main function.
+    */
     public static void main(String[] args) {
         PApplet.main("ghost.App");
     }

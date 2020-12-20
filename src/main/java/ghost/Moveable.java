@@ -12,13 +12,12 @@ public interface Moveable {
   /**
    * Handles the object's logic that happens per frame
    */
-  public abstract void tick();
+  public void tick();
 
   /**
   * Handles graphics relating to the object
   *
   * @param app the app to which the object's sprite is drawn on
   */
-  public abstract void draw(PApplet app);
-
+  public void draw(PApplet app);
 }

@@ -19,7 +19,6 @@ public class Waka implements Moveable {
   private int frameCounter; // counts what frame we are currently on
   private boolean alive;
   private boolean canTurn;
-  private boolean frightenGhosts;
   private PImage spriteLeft;
   private PImage spriteRight;
   private PImage spriteUp;
@@ -48,7 +47,6 @@ public class Waka implements Moveable {
     this.frameCounter = 0;
     this.alive = true;
     this.canTurn = true;
-    this.frightenGhosts = false;
     this.spriteLeft = spriteLeft;
     this.spriteRight = spriteRight;
     this.spriteUp = spriteUp;
@@ -60,27 +58,62 @@ public class Waka implements Moveable {
     this.ghosts = ghosts;
   }
 
+  /**
+  * @return Returns the current x-coordinate.
+  */
   public int getX() {
     return this.x;
   }
 
+  /**
+  * @return Returns the current y-coordinate.
+  */
   public int getY() {
     return this.y;
   }
 
+  /**
+  * @return Returns the current grid x-coordinate.
+  */
+  public int getGridX() {
+    return (this.x + 5) / 16;
+  }
+
+  /**
+  * @return Returns the current y-coordinate.
+  */
+  public int getGridY() {
+    return (this.y + 5) / 16;
+  }
+
+  /**
+  * @return Returns the current number of lives.
+  */
   public int getLives() {
     return this.lives;
   }
 
+  /**
+  * Controls whether or not Waka can turn by setting the canTurn boolean.
+  * @param bool Represents whether or not Waka can turn.
+  */
   public void setCanTurn(boolean bool) {
     this.canTurn = bool;
   }
 
+  /**
+  * Sets Waka's future velocity.
+  * @param x The future x-velocity.
+  * @param y The future y-velocity.
+  */
   public void setVelocity(int x, int y) {
     this.xVelFuture = x;
     this.yVelFuture = y;
   }
 
+  /**
+  * Tick() method that controls logic and movement.
+  */
   public void tick() {
     this.move();
     this.checkPosition();
@@ -89,6 +122,11 @@ public class Waka implements Moveable {
     frameCounter++;
   }
 
+  /**
+  * Draws Waka's sprite to the screen. Ensures the correct Waka sprite is chosen based on the
+  * current frame. Also, ensures Waka is not drawn if it is dead.
+  * @param app the PApplet object to which the sprite is drawn.
+  */
   public void draw(PApplet app) {
     if (this.alive) {
       if (this.frameCounter > 8 && this.frameCounter <= 16) {
@@ -113,8 +151,9 @@ public class Waka implements Moveable {
     }
   }
 
-  /* changes Waka's currentSprite based on its current direction or, if its unable to move,
-   * based on his future direction */
+  /** changes Waka's currentSprite based on its current direction or, if its unable to move,
+   * based on his future direction.
+   */
   public void openMouth() {
     if (this.xVel < 0 && this.yVel == 0) { // left
       this.currentSprite = this.spriteLeft;
@@ -137,7 +176,10 @@ public class Waka implements Moveable {
     }
   }
 
-  // checks whether Waka can move, updates canTurn accordingly
+  /**
+  * Controls Waka's movement. Determines whether Waka is interacting with a Wall, Fruit, superFruit
+  * or Ghost object and applies the correct logic to handle each case.
+  */
   public void checkPosition() {
     // we only check if we are at the center of a grid space
     if ((this.x + 5) % 16 == 0 && (this.y + 5) % 16 == 0) {
@@ -147,9 +189,6 @@ public class Waka implements Moveable {
       // check if a fruit occupies this grid space
       if (this.grid[gridY][gridX] == '7' || this.grid[gridY][gridX] == '8') {
         this.grid[gridY][gridX] = '0'; // no longer a fruit in this space
-        if (this.grid[gridY][gridX] == '8') {
-          this.frightenGhosts = true;
-        }
         for (Fruit fruit : this.fruits) {
           // we check to see which fruit Waka is currently passing through
           if (fruit.getX() / 16 == gridX && fruit.getY() / 16 == gridY) {
@@ -163,10 +202,17 @@ public class Waka implements Moveable {
 
       // checking if we occupy the same space as a ghost
       if (this.checkGhost(gridX, gridY)) {
-        if (!this.frightenGhosts) {
-          this.lives--;
-          this.alive = false;
-          this.resetPos();
+        this.lives--;
+        this.alive = false;
+        this.resetPos();
+      } else {
+        for (Ghost ghost : this.ghosts) {
+          if (ghost.getGridX() == gridX && ghost.getGridY() == gridY) {
+            if (ghost.isAlive()) {
+              ghost.eatGhost();
+              break;
+            }
+          }
         }
       }
 
@@ -189,7 +235,12 @@ public class Waka implements Moveable {
     }
   }
 
-  // checks if the char at the specified index represents any wall object in the char matrix
+  /**
+  * A method which checks if a wall object is at the specified coordinates.
+  * @param x x-coordinate to check, in grid form.
+  * @param y y-coordinate to check, in grid form.
+  * @return Returns a boolean representing whether or not a wall exists at the checked location.
+  */
   public boolean checkGrid(int x, int y) {
     if (this.grid[y][x] == '1') {
       return true;
@@ -208,22 +259,35 @@ public class Waka implements Moveable {
     }
   }
 
-  // checks if Waka occupies the same grid space as a ghost
+  /**
+  * A method which checks if a Ghost object is at the specified coordinates.
+  * @param x x-coordinate to check, in grid form.
+  * @param y y-coordinate to check, in grid form.
+  * @return Returns a boolean representing whether or not a wall exists at the checked location.
+  */
   public boolean checkGhost(int x, int y) {
     for (Ghost ghost : this.ghosts) {
       if (x == ghost.getGridX() && y == ghost.getGridY()) {
-        return true;
+        if (!ghost.isFrightened()) {
+          return true;
+        }
       }
     }
     return false;
   }
 
+  /**
+  * Checks if Waka is dead (i.e. has no lives left).
+  */
   public void checkDeath() {
     if (this.lives == 0) {
       this.alive = false;
     }
   }
 
+    /**
+    * Handles Waka movement once the velocity has been set.
+    */
   public void move() {
     if (this.canTurn) {
       this.x += this.xVel;
@@ -231,7 +295,9 @@ public class Waka implements Moveable {
     }
   }
 
-  // resets Waka's initial position and velocity after colliding
+  /**
+  * Resets Waka's position to the default position once it has been killed by a Ghost.
+  */
   public void resetPos() {
     this.x = this.initialX;
     this.y = this.initialY;

@@ -22,22 +22,23 @@ public class Wall {
   public void tick() {
   }
 
+  /**
+  * @return Returns the current x-coordinate.
+  */
   public int getX() {
     return this.x;
   }
-
+  /**
+  * @return Returns the current y-coordinate.
+  */
   public int getY() {
     return this.y;
   }
 
-  public int getHeight() {
-    return this.sprite.height;
-  }
-
-  public int getWidth() {
-    return this.sprite.width;
-  }
-
+  /**
+  * Draws each wall sprite to the screen.
+  * @param the PApplet object to which the sprite is drawn.
+  */
   public void draw(PApplet app) {
     app.image(this.sprite, this.x, this.y);
   }
